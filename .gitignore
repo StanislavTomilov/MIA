@@ -1,0 +1,20 @@
+# .gitignore
+# IDE
+.idea/
+*.iml
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+.venv/
+env/
+venv/
+*.db
+
+# Data
+audio/
+output/
+*.wav
+*.json
