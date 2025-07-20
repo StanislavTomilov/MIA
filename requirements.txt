@@ -1,2 +1,6 @@
-sounddevice
-soundfile
+sounddevice      # Захват и воспроизведение аудио
+soundfile        # Чтение и запись аудиофайлов
+numpy            # Обработка и хранение аудиомассивов
+torch            # PyTorch, ML-движок для WhisperX
+ffmpeg-python    # Обёртка для ffmpeg (работа с аудиофайлами)
+git+https://github.com/m-bain/whisperX.git   # WhisperX для транскрипции
