@@ -1,6 +1,22 @@
 sounddevice      # Захват и воспроизведение аудио
 soundfile        # Чтение и запись аудиофайлов
 numpy            # Обработка и хранение аудиомассивов
-torch            # PyTorch, ML-движок для WhisperX
 ffmpeg-python    # Обёртка для ffmpeg (работа с аудиофайлами)
-git+https://github.com/m-bain/whisperX.git   # WhisperX для транскрипции
+whisperx
+ctranslate2
+faster-whisper
+torch    # PyTorch, ML-движок для WhisperX
+torchaudio
+ollama
+toml
+transformers
+diarizationlm
+#Установка DiariZen вручную из репозитория
+#git clone https://github.com/BUTSpeechFIT/DiariZen.git
+#cd DiariZen
+#pip install -e .
+#cd pyannote-audio
+#pip install -e .[dev,testing]
+#cd ..
+#git submodule init
+#git submodule update
