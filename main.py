@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     #audio_path = "/home/stanislav/PycharmProjects/MIA/audio/meeting_2025-07-30_07-12-30_linux.wav"
 
-    result_aligned = transcribe_with_whisperx_diarization(audio_path, device="cuda", hf_token="REMOVED_HF_TOKEN")
+    result_aligned = transcribe_with_whisperx_diarization(audio_path, device="cuda", hf_token="HF_TOKEN")
     save_transcript(result_aligned, audio_path)
 
     # Извлекаем чистый текст
