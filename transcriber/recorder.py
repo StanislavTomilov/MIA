@@ -1,130 +1,161 @@
-import os
-from datetime import datetime
 import subprocess
-import soundfile as sf
+import os
+import sys
+import threading
+import time
+from datetime import datetime
 
-import sounddevice as sd
+def ensure_virtual_cable_and_loopback():
+    # 1. Проверяем VirtualCable
+    sinks = subprocess.check_output(['pactl', 'list', 'sinks', 'short']).decode()
+    if "VirtualCable" not in sinks:
+        print("[AudioSetup] VirtualCable не найден, создаём...")
+        subprocess.run([
+            'pactl', 'load-module', 'module-null-sink',
+            'sink_name=VirtualCable',
+            'sink_properties=device.description=VirtualCable',
+            'rate=48000', 'format=s16le', 'channels=1'
+        ], check=True)
 
-def _find_device_id_by_name(name_parts):
-    """
-    name_parts: список подстрок для поиска (например, ["VirtualCable", "pulse", "default"])
-    Ищет по output и input девайсам.
-    """
-    devices = sd.query_devices()
-    # Сначала ищем по output
-    for name in name_parts:
-        for idx, dev in enumerate(devices):
-            if name.lower() in dev['name'].lower() and dev['max_output_channels'] > 0:
-                print(f"✅ Найдено output-устройство: {dev['name']} (id={idx})")
-                return idx
-    # Затем ищем по input
-    for name in name_parts:
-        for idx, dev in enumerate(devices):
-            if name.lower() in dev['name'].lower() and dev['max_input_channels'] > 0:
-                print(f"✅ Найдено input-устройство: {dev['name']} (id={idx})")
-                return idx
-    # Не найдено — печатаем всё, что есть
-    print(f"❌ Не найдено подходящего устройства из списка: {name_parts}")
-    print("\nВсе устройства:")
-    for idx, dev in enumerate(devices):
-        print(f"ID: {idx:2d} | name: {dev['name']} | in: {dev['max_input_channels']} | out: {dev['max_output_channels']}")
-    raise RuntimeError(
-        f"\nНе найдено ни одного устройства из {name_parts}. Проверь настройку виртуального кабеля и PulseAudio/PipeWire!"
-    )
+        subprocess.run([
+            'pactl', 'load-module', 'module-loopback',
+            f'source=alsa_output.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__hw_sofhdadsp__sink.monitor',
+            'sink=VirtualCable',
+            'latency_msec=50',
+            'rate=48000',
+            'channels=2',
+            'use_mmap=false'
+        ], check=True)
 
+        subprocess.run([
+            'pactl', 'load-module', 'module-loopback',
+            f'source=source=alsa_input.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__hw_sofhdadsp_6__source',
+            'sink=VirtualCable',
+            'latency_msec=50',
+            'rate=48000',
+            'channels=2',
+            'use_mmap=false'
+        ], check=True)
 
-def record_audio_windows(duration_sec=10, output_dir="audio"):
-    """
-    Запись аудио с VB-Cable, Stereo Mix или другого виртуального устройства на Windows.
-    """
-    os.makedirs(output_dir, exist_ok=True)
-    for virtual_name in ["VB-Cable", "Stereo Mix"]:
-        try:
-            device_id = _find_device_id_by_name(virtual_name)
+    else:
+        print("[AudioSetup] VirtualCable уже создан.")
+
+    # 2. Проверяем наличие нужного loopback (по названию source и sink)
+    modules = subprocess.check_output(['pactl', 'list', 'modules', 'short']).decode()
+    need_source = 'alsa_input.pci-0000_00_1f.3-platform-skl_hda_dsp_generic.HiFi__hw_sofhdadsp_6__source'
+    loopback_found = False
+    for line in modules.splitlines():
+        if 'module-loopback' in line and 'sink=VirtualCable' in line and f'source={need_source}' in line:
+            loopback_found = True
             break
-        except RuntimeError:
-            device_id = None
-    if device_id is None:
-        raise RuntimeError(
-            "Не найден VB-Cable или Stereo Mix! Подключи virtual audio device и выставь его как системный выход."
-        )
+    if not loopback_found:
+        print("[AudioSetup] Loopback не найден, создаём...")
+        subprocess.run([
+            'pactl', 'load-module', 'module-loopback',
+            f'source={need_source}',
+            'sink=VirtualCable',
+            'latency_msec=50',
+            'rate=48000',
+            'channels=2',
+            'use_mmap=false'
+        ], check=True)
+    else:
+        print("[AudioSetup] Loopback уже создан.")
 
-    samplerate = 48000
-    channels = 1
-    dtype = 'int16'
+# Пример вызова:
+ensure_virtual_cable_and_loopback()
 
-    print(f"🔴 Запись аудио Windows: {duration_sec} сек, device id {device_id}")
-    audio = sd.rec(
-        int(duration_sec * samplerate),
-        samplerate=samplerate,
-        channels=channels,
-        dtype=dtype,
-        device=device_id
-    )
-    sd.wait()
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    filename = os.path.join(output_dir, f"meeting_{timestamp}_win.wav")
-    sf.write(filename, audio, samplerate, subtype='PCM_16')
-    print(f"✅ Файл сохранён: {filename}")
-    return filename
 
-def record_audio_linux(duration_sec=10, output_dir="audio"):
-    """
-    Запись system audio на Linux с помощью parec + sox (максимальное качество, как в терминале).
-    Требует настроенного VirtualCable с monitor-источником.
-    """
-    os.makedirs(output_dir, exist_ok=True)
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    filename = os.path.join(output_dir, f"meeting_{timestamp}_linux.wav")
+AUDIO_DIR = "audio"
 
-    # Команды для записи — ровно как ты писал в терминале!
-    parec_cmd = [
-        "parec", "-d", "VirtualCable.monitor",
-        "--rate=48000", "--format=s16le", "--channels=1", "--latency-msec=1"
-    ]
+def _generate_filename(prefix):
+    ts = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    return f"{AUDIO_DIR}/{prefix}_{ts}_{sys.platform}.wav"
 
-    sox_cmd = [
-        "sox", "-t", "raw", "-r", "48000", "-e", "signed-integer", "-b", "16", "-c", "1", "-V1", "-", filename
-    ]
+class Recorder:
+    def __init__(self,
+                 monitor_name="VirtualCable.monitor",
+                 samplerate=48000,
+                 channels=1):
+        self.monitor_name = monitor_name
+        self.samplerate = samplerate
+        self.channels = channels
+        self.main_proc = None
+        self.main_filename = None
+        self.question_proc = None
+        self.question_filename = None
 
-    print(f"🔴 Запись через parec + sox ({duration_sec} сек)...")
+        os.makedirs(AUDIO_DIR, exist_ok=True)
+        print(f"[Recorder] monitor={monitor_name}, samplerate={samplerate}, channels={channels}")
 
-    # Запускаем parec → sox через пайп
-    parec_proc = subprocess.Popen(parec_cmd, stdout=subprocess.PIPE)
-    sox_proc = subprocess.Popen(sox_cmd, stdin=parec_proc.stdout)
+    def _start_parec_recording(self, filename, duration_sec=None):
+        parec_cmd = [
+            "parec", "-d", self.monitor_name,
+            f"--rate={self.samplerate}",
+            "--format=s16le",
+            f"--channels={self.channels}",
+            "--latency-msec=1"
+        ]
+        sox_cmd = [
+            "sox", "-t", "raw", f"-r{self.samplerate}",
+            "-e", "signed-integer", "-b", "16",
+            f"-c{self.channels}", "-", filename
+        ]
+        parec_proc = subprocess.Popen(parec_cmd, stdout=subprocess.PIPE)
+        sox_proc = subprocess.Popen(sox_cmd, stdin=parec_proc.stdout)
+        # Если задан duration_sec — останавливаем через timeout
+        if duration_sec is not None:
+            def stop_after_delay():
+                time.sleep(duration_sec)
+                try:
+                    parec_proc.terminate()
+                    sox_proc.terminate()
+                except Exception as e:
+                    print("[Recorder] Ошибка при остановке процесса:", e)
+            threading.Thread(target=stop_after_delay, daemon=True).start()
+        return parec_proc, sox_proc
 
-    try:
-        sox_proc.wait(timeout=duration_sec)
-    except subprocess.TimeoutExpired:
-        print("⏹ Останавливаем запись (timeout)...")
-        parec_proc.terminate()
-        sox_proc.terminate()
+    def start_main_recording(self):
+        filename = _generate_filename("meeting")
+        print(f"[Recorder] ▶️ Запись встречи: {filename}")
+        self.main_proc, self.main_sox = self._start_parec_recording(filename)
+        self.main_filename = filename
 
-    abs_path = os.path.abspath(filename)
-    print(f"✅ Файл сохранён: {abs_path}")
-    return filename
+    def stop_main_recording(self):
+        print("[Recorder] ⏹ Останавливаю основную запись...")
+        if self.main_proc:
+            self.main_proc.terminate()
+        if self.main_sox:
+            self.main_sox.terminate()
+            self.main_sox.wait()
+        print(f"[Recorder] ✅ Основная запись завершена, файл сохранён: {self.main_filename}")
+        return self.main_filename
 
-def record_audio_mac(duration_sec=10, output_dir="audio"):
-    """
-    Запись аудио с BlackHole или другого virtual audio device на Mac.
-    """
-    os.makedirs(output_dir, exist_ok=True)
-    device_id = _find_device_id_by_name("BlackHole")
-    samplerate = 48000
-    channels = 1
-    dtype = 'int16'
+    def start_question_recording(self):
+        filename = _generate_filename("question")
+        print(f"[Recorder] 🔴 Запись вопроса: {filename}")
+        self.question_proc, self.question_sox = self._start_parec_recording(filename)
+        self.question_filename = filename
 
-    print(f"🔴 Запись аудио MacOS: {duration_sec} сек, device id {device_id}")
-    audio = sd.rec(
-        int(duration_sec * samplerate),
-        samplerate=samplerate,
-        channels=channels,
-        dtype=dtype,
-        device=device_id
-    )
-    sd.wait()
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    filename = os.path.join(output_dir, f"meeting_{timestamp}_mac.wav")
-    sf.write(filename, audio, samplerate, subtype='PCM_16')
-    print(f"✅ Файл сохранён: {filename}")
-    return filename
+    def stop_question_recording(self):
+        print("[Recorder] 🔵 Останавливаю запись вопроса...")
+        if self.question_proc:
+            self.question_proc.terminate()
+        if self.question_sox:
+            self.question_sox.terminate()
+            self.question_sox.wait()
+        print(f"[Recorder] ✅ Запись вопроса завершена, файл сохранён: {self.question_filename}")
+        return self.question_filename
+
+    @classmethod
+    def create_auto(cls, monitor_name=None, samplerate=48000, channels=1):
+        """
+        Фабричный метод для создания Recorder.
+        monitor_name — например, 'VirtualCable.monitor'.
+        """
+        ensure_virtual_cable_and_loopback()
+
+        if monitor_name is None:
+            monitor_name = "VirtualCable.monitor"
+        return cls(monitor_name=monitor_name, samplerate=samplerate, channels=channels)
+

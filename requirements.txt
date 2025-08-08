@@ -11,6 +11,7 @@ ollama
 toml
 transformers
 diarizationlm
+pynput
 #Установка DiariZen вручную из репозитория
 #git clone https://github.com/BUTSpeechFIT/DiariZen.git
 #cd DiariZen
