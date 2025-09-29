@@ -3,17 +3,12 @@ import os
 from datetime import datetime
 
 TRANSCRIPTS_DIR = "/home/stanislav/PycharmProjects/MIA/transcripts"
+TRANSCRIPTS_MEET = os.path.join(TRANSCRIPTS_DIR, "meetings")
+TRANSCRIPTS_QUEST = os.path.join(TRANSCRIPTS_DIR, "questions")
+os.makedirs(TRANSCRIPTS_MEET, exist_ok=True)
+os.makedirs(TRANSCRIPTS_QUEST, exist_ok=True)
 
 def load_asr_model(device="cuda"):
-    """
-    Загружает Faster-Whisper модель для выбранного устройства.
-    device: "cuda" или "cpu"
-    """
-
-    # Путь к папке для сохранения транскрипций
-    TRANSCRIPTS_DIR = "/home/stanislav/PycharmProjects/MIA/transcripts"
-    os.makedirs(TRANSCRIPTS_DIR, exist_ok=True)  # Создаём, если нет
-
     print(f"⏳ Загружаем Faster-Whisper ({device})...")
     model = WhisperModel("base", device=device, compute_type="float16" if device=="cuda" else "int8")
     return model
@@ -21,31 +16,35 @@ def load_asr_model(device="cuda"):
 def transcribe_with_faster_whisper(audio_path, asr_model=None):
     """
     Транскрибирует аудиофайл с помощью Faster-Whisper.
-    Возвращает полный текст.
+    Возвращает полный текст. Сохраняет транскрипт в нужную подпапку.
     """
-
     if asr_model is None:
         asr_model = load_asr_model()
 
     print(f"📝 Транскрибация файла: {audio_path}")
-    segments, info = asr_model.transcribe(audio_path, language="ru")
-    # Собираем текст из всех сегментов
-    text = " ".join([segment.text.strip() for segment in segments])
+    segments, info = asr_model.transcribe(audio_path, language="ru", task="transcribe")
+
+    text = " ".join([segment.text.strip() for segment in segments]).strip()
     print("📝 Транскрибация файла завершена")
 
-    # --- Сохранение транскрипции в файл ---
-    os.makedirs(TRANSCRIPTS_DIR, exist_ok=True)
+    base_name = os.path.splitext(os.path.basename(audio_path))[0]  # meeting_..._linux
     ts = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    base_name = os.path.splitext(os.path.basename(audio_path))[0]
-    file_path = os.path.join(TRANSCRIPTS_DIR, f"{base_name}_{ts}.txt")
 
+    # Выбор подпапки по префиксу
+    if base_name.startswith("meeting_"):
+        out_dir = TRANSCRIPTS_MEET
+    elif base_name.startswith("question_"):
+        out_dir = TRANSCRIPTS_QUEST
+    else:
+        out_dir = TRANSCRIPTS_DIR  # запасной вариант
+
+    os.makedirs(out_dir, exist_ok=True)
+    file_path = os.path.join(out_dir, f"{base_name}_{ts}.txt")
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(text)
 
     print(f"[Whisper] ✅ Транскрипция сохранена: {file_path}")
-    # --- Конец добавления ---
-
-    return text.strip()
+    return text
 
 
 
@@ -163,8 +162,8 @@ def transcribe_with_faster_whisper(audio_path, asr_model=None):
 #     # Мержим: заменяем speaker в asr["segments"]
 #     new_segments = []
 #     for seg in asr["segments"]:
-#         for (s, e), sid in corrected.items():
-#             if seg["start"] < e and seg["end"] > s:
+#         for (api, e), sid in corrected.items():
+#             if seg["start"] < e and seg["end"] > api:
 #                 seg["speaker"] = sid
 #                 break
 #         new_segments.append(seg)

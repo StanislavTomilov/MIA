@@ -1,4 +1,5 @@
 # .gitignore
+
 # IDE
 .idea/
 *.iml
@@ -13,8 +14,19 @@ env/
 venv/
 *.db
 
-# Data
+# Artifacts / data we do NOT want in git
+audio/             # сырые записи (.wav и прочее) — НЕ в гит
+output/            # временные артефакты/локальные выгрузки
+*.wav              # защита на случай попадания вне audio/
+
+# Optional: модели/чекпоинты (если таки появятся)
+models/
+checkpoints/
+*.pt
+*.bin
+*.safetensors
+
+# ВАЖНО: НЕ игнорим *.json глобально — нам нужны summaries/*.json
+# transcripts/ — у нас .txt (оставляем отслеживаемыми)
+# summaries/   — .json (оставляем отслеживаемыми)
 audio/
-output/
-*.wav
-*.json

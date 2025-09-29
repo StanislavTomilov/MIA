@@ -1,3 +1,5 @@
+sudo openvpn --config /home/stanislav/Downloads/profile-3695246691635880378.ovpn
+
 # 8. Посмотреть список всех устройств вывода и ввода
 pactl list sinks short
 pactl list sources short

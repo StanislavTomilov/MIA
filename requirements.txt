@@ -1,23 +1,36 @@
-sounddevice      # Захват и воспроизведение аудио
-soundfile        # Чтение и запись аудиофайлов
-numpy            # Обработка и хранение аудиомассивов
-ffmpeg-python    # Обёртка для ffmpeg (работа с аудиофайлами)
-whisperx
-ctranslate2
-faster-whisper
-torch    # PyTorch, ML-движок для WhisperX
-torchaudio
-ollama
-toml
-transformers
-diarizationlm
-pynput
-#Установка DiariZen вручную из репозитория
-#git clone https://github.com/BUTSpeechFIT/DiariZen.git
-#cd DiariZen
-#pip install -e .
-#cd pyannote-audio
-#pip install -e .[dev,testing]
-#cd ..
-#git submodule init
-#git submodule update
+# 1) ПЕРВЫМ делом — индекс с CUDA 12.1 для PyTorch
+--extra-index-url https://download.pytorch.org/whl/cu121
+
+# 2) Базовые пины под whisperx/transformers/pyannote
+numpy==2.1.3
+tokenizers==0.21.2
+semver==3.0.2
+
+# 3) PyTorch стек (CUDA 12.1)
+torch==2.7.1
+torchvision==0.22.1
+torchaudio==2.7.1
+
+# 4) ASR/диаризация
+whisperx==3.4.2
+faster-whisper==1.1.1
+pyannote.audio==3.3.2
+transformers==4.54.0
+
+# 5) Эмбеддинги для RAG (SBERT). Если НЕ используешь — УДАЛИ эту строку:
+sentence-transformers==3.0.1
+tf-keras
+faiss-cpu==1.9.0.post1
+
+# 6) Аудио I/O и DSP
+sounddevice==0.4.6
+soundfile==0.12.1
+librosa==0.10.2.post1
+ffmpeg-python==0.2.0
+
+# 7) Утилиты
+pynput==1.7.6
+toml==0.10.2
+ctranslate2==4.4.0
+ollama>=0.3.0,<0.4    # если используешь локальный Ollama-клиент
+

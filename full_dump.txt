@@ -1,0 +1,441 @@
+.
+├── agent
+│   ├── graph.py
+│   ├── __init__.py
+│   ├── interview.py
+│   └── protocol.py
+├── api
+│   ├── __init__.py
+│   └── server.py
+├── audio
+│   ├── meetings
+│   │   ├── meeting_2025-08-08_08-44-31_linux.wav
+│   │   └── meeting_2025-08-25_07-07-53_linux.wav
+│   └── questions
+│       ├── question_2025-08-08_08-44-36_linux.wav
+│       └── question_2025-08-25_07-07-58_linux.wav
+├── DiariZen
+│   ├── diarizen
+│   │   ├── ckpt_utils.py
+│   │   ├── clustering
+│   │   │   └── VBx.py
+│   │   ├── __init__.py
+│   │   ├── logger.py
+│   │   ├── models
+│   │   │   ├── eend
+│   │   │   │   ├── model_fbank_conformer.py
+│   │   │   │   ├── model_pyannote.py
+│   │   │   │   └── model_wavlm_conformer.py
+│   │   │   ├── __init__.py
+│   │   │   ├── module
+│   │   │   │   ├── conformer.py
+│   │   │   │   ├── speechbrain_feats.py
+│   │   │   │   ├── wav2vec2
+│   │   │   │   │   ├── components.py
+│   │   │   │   │   ├── hardconcrete.py
+│   │   │   │   │   ├── __init__.py
+│   │   │   │   │   ├── model.py
+│   │   │   │   │   ├── pruning_utils.py
+│   │   │   │   │   └── utils
+│   │   │   │   │       ├── import_huggingface_wavlm.py
+│   │   │   │   │       └── __init__.py
+│   │   │   │   └── wavlm_config.py
+│   │   │   └── pruning
+│   │   │       ├── model_distill_prune.py
+│   │   │       └── utils.py
+│   │   ├── noam_updater.py
+│   │   ├── optimization.py
+│   │   ├── pipelines
+│   │   │   ├── inference.py
+│   │   │   ├── __init__.py
+│   │   │   └── utils.py
+│   │   ├── trainer_distill_prune.py
+│   │   ├── trainer_dual_opt.py
+│   │   ├── trainer_single_opt.py
+│   │   ├── trainer_utils.py
+│   │   └── utils.py
+│   ├── dscore
+│   │   ├── LICENSE
+│   │   ├── README.md
+│   │   ├── requirements.txt
+│   │   ├── scorelib
+│   │   │   ├── argparse.py
+│   │   │   ├── __init__.py
+│   │   │   ├── md-eval-22.pl
+│   │   │   ├── metrics.py
+│   │   │   ├── rttm.py
+│   │   │   ├── score.py
+│   │   │   ├── six.py
+│   │   │   ├── tests
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── ref.rttm
+│   │   │   │   ├── sys.rttm
+│   │   │   │   ├── test_load.uem
+│   │   │   │   ├── test_metrics.py
+│   │   │   │   ├── test_score.py
+│   │   │   │   ├── test_turn.py
+│   │   │   │   ├── test_uem.py
+│   │   │   │   └── test_write.uem
+│   │   │   ├── turn.py
+│   │   │   ├── uem.py
+│   │   │   └── utils.py
+│   │   ├── score.py
+│   │   └── validate_rttm.py
+│   ├── example
+│   │   └── EN2002a_30s.wav
+│   ├── LICENSE
+│   ├── pyannote-audio
+│   │   ├── CHANGELOG.md
+│   │   ├── codecov.yml
+│   │   ├── CODE_OF_CONDUCT.md
+│   │   ├── doc
+│   │   │   ├── gen_docs.py
+│   │   │   ├── requirements.txt
+│   │   │   └── source
+│   │   │       └── index.rst
+│   │   ├── environment.yaml
+│   │   ├── FAQ.md
+│   │   ├── faq.yml
+│   │   ├── LICENSE
+│   │   ├── MANIFEST.in
+│   │   ├── notebook
+│   │   │   ├── augmentation.ipynb
+│   │   │   ├── example.ipynb
+│   │   │   ├── freeze.ipynb
+│   │   │   ├── inference.ipynb
+│   │   │   └── sharing.ipynb
+│   │   ├── pyannote
+│   │   │   ├── audio
+│   │   │   │   ├── augmentation
+│   │   │   │   │   ├── __init__.py
+│   │   │   │   │   ├── mix.py
+│   │   │   │   │   └── registry.py
+│   │   │   │   ├── cli
+│   │   │   │   │   ├── config
+│   │   │   │   │   │   └── hydra
+│   │   │   │   │   │       └── default.yaml
+│   │   │   │   │   ├── evaluate_config
+│   │   │   │   │   │   ├── config.yaml
+│   │   │   │   │   │   ├── hydra
+│   │   │   │   │   │   │   └── default.yaml
+│   │   │   │   │   │   └── __init__.py
+│   │   │   │   │   ├── evaluate.py
+│   │   │   │   │   ├── __init__.py
+│   │   │   │   │   ├── lr_schedulers
+│   │   │   │   │   │   ├── CosineAnnealingWarmRestarts.py
+│   │   │   │   │   │   ├── CyclicLR.py
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   └── ReduceLROnPlateau.py
+│   │   │   │   │   ├── pretrained.py
+│   │   │   │   │   ├── train_config
+│   │   │   │   │   │   ├── config.yaml
+│   │   │   │   │   │   ├── hydra
+│   │   │   │   │   │   │   └── default.yaml
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── model
+│   │   │   │   │   │   │   ├── DebugEmbedding.yaml
+│   │   │   │   │   │   │   ├── DebugSegmentation.yaml
+│   │   │   │   │   │   │   ├── Pretrained.yaml
+│   │   │   │   │   │   │   ├── PyanNet.yaml
+│   │   │   │   │   │   │   ├── SSeRiouSS.yaml
+│   │   │   │   │   │   │   ├── XVectorMFCC.yaml
+│   │   │   │   │   │   │   └── XVectorSincNet.yaml
+│   │   │   │   │   │   ├── optimizer
+│   │   │   │   │   │   │   ├── AdamW.yaml
+│   │   │   │   │   │   │   ├── Adam.yaml
+│   │   │   │   │   │   │   └── Adan.yaml
+│   │   │   │   │   │   ├── preprocessor
+│   │   │   │   │   │   │   └── LowerTemporalResolution.yaml
+│   │   │   │   │   │   ├── scheduler
+│   │   │   │   │   │   │   ├── CosineAnnealingWarmRestarts.yaml
+│   │   │   │   │   │   │   ├── CyclicLR.yaml
+│   │   │   │   │   │   │   └── ReduceLROnPlateau.yaml
+│   │   │   │   │   │   ├── task
+│   │   │   │   │   │   │   ├── MultiLabelSegmentation.yaml
+│   │   │   │   │   │   │   ├── OverlappedSpeechDetection.yaml
+│   │   │   │   │   │   │   ├── SpeakerDiarization.yaml
+│   │   │   │   │   │   │   ├── SpeakerEmbedding.yaml
+│   │   │   │   │   │   │   └── VoiceActivityDetection.yaml
+│   │   │   │   │   │   └── trainer
+│   │   │   │   │   │       ├── default.yaml
+│   │   │   │   │   │       └── fast_dev_run.yaml
+│   │   │   │   │   └── train.py
+│   │   │   │   ├── core
+│   │   │   │   │   ├── callback.py
+│   │   │   │   │   ├── inference.py
+│   │   │   │   │   ├── __init__.py
+│   │   │   │   │   ├── io.py
+│   │   │   │   │   ├── model.py
+│   │   │   │   │   ├── pipeline.py
+│   │   │   │   │   └── task.py
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── models
+│   │   │   │   │   ├── blocks
+│   │   │   │   │   │   ├── pooling.py
+│   │   │   │   │   │   └── sincnet.py
+│   │   │   │   │   ├── embedding
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   ├── wespeaker
+│   │   │   │   │   │   │   ├── convert.py
+│   │   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   │   ├── LICENSE.WeSpeaker
+│   │   │   │   │   │   │   └── resnet.py
+│   │   │   │   │   │   └── xvector.py
+│   │   │   │   │   ├── __init__.py
+│   │   │   │   │   └── segmentation
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── PyanNet.py
+│   │   │   │   │       └── SSeRiouSS.py
+│   │   │   │   ├── pipelines
+│   │   │   │   │   ├── clustering.py
+│   │   │   │   │   ├── __init__.py
+│   │   │   │   │   ├── multilabel.py
+│   │   │   │   │   ├── overlapped_speech_detection.py
+│   │   │   │   │   ├── resegmentation.py
+│   │   │   │   │   ├── speaker_diarization.py
+│   │   │   │   │   ├── speaker_verification.py
+│   │   │   │   │   ├── utils
+│   │   │   │   │   │   ├── diarization.py
+│   │   │   │   │   │   ├── getter.py
+│   │   │   │   │   │   ├── hook.py
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   └── oracle.py
+│   │   │   │   │   └── voice_activity_detection.py
+│   │   │   │   ├── sample
+│   │   │   │   │   ├── __init__.py
+│   │   │   │   │   ├── sample.rttm
+│   │   │   │   │   └── sample.wav
+│   │   │   │   ├── tasks
+│   │   │   │   │   ├── embedding
+│   │   │   │   │   │   ├── arcface.py
+│   │   │   │   │   │   ├── __init__.py
+│   │   │   │   │   │   └── mixins.py
+│   │   │   │   │   ├── __init__.py
+│   │   │   │   │   └── segmentation
+│   │   │   │   │       ├── __init__.py
+│   │   │   │   │       ├── mixins.py
+│   │   │   │   │       ├── multilabel.py
+│   │   │   │   │       ├── overlapped_speech_detection.py
+│   │   │   │   │       ├── speaker_diarization.py
+│   │   │   │   │       └── voice_activity_detection.py
+│   │   │   │   ├── torchmetrics
+│   │   │   │   │   ├── audio
+│   │   │   │   │   │   ├── diarization_error_rate.py
+│   │   │   │   │   │   └── __init__.py
+│   │   │   │   │   ├── classification
+│   │   │   │   │   │   ├── equal_error_rate.py
+│   │   │   │   │   │   └── __init__.py
+│   │   │   │   │   ├── functional
+│   │   │   │   │   │   ├── audio
+│   │   │   │   │   │   │   ├── diarization_error_rate.py
+│   │   │   │   │   │   │   └── __init__.py
+│   │   │   │   │   │   └── __init__.py
+│   │   │   │   │   └── __init__.py
+│   │   │   │   ├── utils
+│   │   │   │   │   ├── __init__.py
+│   │   │   │   │   ├── loss.py
+│   │   │   │   │   ├── metric.py
+│   │   │   │   │   ├── multi_task.py
+│   │   │   │   │   ├── params.py
+│   │   │   │   │   ├── permutation.py
+│   │   │   │   │   ├── powerset.py
+│   │   │   │   │   ├── preprocessors.py
+│   │   │   │   │   ├── preview.py
+│   │   │   │   │   ├── probe.py
+│   │   │   │   │   ├── protocol.py
+│   │   │   │   │   ├── random.py
+│   │   │   │   │   ├── receptive_field.py
+│   │   │   │   │   ├── reproducibility.py
+│   │   │   │   │   ├── signal.py
+│   │   │   │   │   └── version.py
+│   │   │   │   └── version.py
+│   │   │   └── __init__.py
+│   │   ├── questions
+│   │   │   ├── bad_performance.question.md
+│   │   │   ├── from_memory.question.md
+│   │   │   ├── offline.question.md
+│   │   │   ├── pyannote.question.md
+│   │   │   ├── README.md
+│   │   │   └── streaming.question.md
+│   │   ├── README.md
+│   │   ├── requirements.txt
+│   │   ├── setup.cfg
+│   │   ├── setup.py
+│   │   ├── tests
+│   │   │   ├── conftest.py
+│   │   │   ├── inference_test.py
+│   │   │   ├── io_test.py
+│   │   │   ├── tasks
+│   │   │   │   ├── test_reproducibility.py
+│   │   │   │   └── test_specifications.py
+│   │   │   ├── test_cli.py
+│   │   │   ├── test_clustering.py
+│   │   │   ├── test_import_lib.py
+│   │   │   ├── test_metrics.py
+│   │   │   ├── test_run_notebooks.py
+│   │   │   ├── test_sample.py
+│   │   │   ├── test_stats_pool.py
+│   │   │   ├── test_train.py
+│   │   │   └── utils
+│   │   │       ├── preview.py
+│   │   │       ├── probe_util_test.py
+│   │   │       ├── test_permutation.py
+│   │   │       └── test_powerset.py
+│   │   ├── tutorials
+│   │   │   ├── adapting_pretrained_pipeline.ipynb
+│   │   │   ├── add_your_own_model.ipynb
+│   │   │   ├── add_your_own_task.ipynb
+│   │   │   ├── applying_a_model.ipynb
+│   │   │   ├── applying_a_pipeline.ipynb
+│   │   │   ├── assets
+│   │   │   │   ├── download-model.png
+│   │   │   │   ├── download-pipeline.png
+│   │   │   │   ├── prodigy-pyannote.audio.png
+│   │   │   │   ├── pyannote.diff.PNG
+│   │   │   │   ├── pyannote.review.PNG
+│   │   │   │   ├── sample.rttm
+│   │   │   │   └── sample.wav
+│   │   │   ├── community
+│   │   │   │   └── offline_usage_speaker_diarization.ipynb
+│   │   │   ├── intro.ipynb
+│   │   │   ├── MRE_template.ipynb
+│   │   │   ├── overlapped_speech_detection.ipynb
+│   │   │   ├── speaker_verification.ipynb
+│   │   │   ├── training_a_model.ipynb
+│   │   │   ├── training_with_cli.md
+│   │   │   └── voice_activity_detection.ipynb
+│   │   └── version.txt
+│   ├── pyproject.toml
+│   ├── README.md
+│   ├── recipes
+│   │   ├── diar_ssl
+│   │   │   ├── conf
+│   │   │   │   ├── fbank_conformer.toml
+│   │   │   │   ├── pyannote_baseline.toml
+│   │   │   │   ├── wavlm_frozen_conformer.toml
+│   │   │   │   └── wavlm_updated_conformer.toml
+│   │   │   ├── data
+│   │   │   │   ├── AMI_AliMeeting_AISHELL4
+│   │   │   │   │   ├── dev
+│   │   │   │   │   │   ├── all.uem
+│   │   │   │   │   │   ├── rttm
+│   │   │   │   │   │   └── wav.scp
+│   │   │   │   │   ├── test
+│   │   │   │   │   │   ├── AISHELL4
+│   │   │   │   │   │   │   ├── all.uem
+│   │   │   │   │   │   │   ├── rttm
+│   │   │   │   │   │   │   └── wav.scp
+│   │   │   │   │   │   ├── AliMeeting
+│   │   │   │   │   │   │   ├── all.uem
+│   │   │   │   │   │   │   ├── rttm
+│   │   │   │   │   │   │   └── wav.scp
+│   │   │   │   │   │   └── AMI
+│   │   │   │   │   │       ├── all.uem
+│   │   │   │   │   │       ├── rttm
+│   │   │   │   │   │       └── wav.scp
+│   │   │   │   │   └── train
+│   │   │   │   │       ├── all.uem
+│   │   │   │   │       ├── rttm
+│   │   │   │   │       └── wav.scp
+│   │   │   │   └── NSF
+│   │   │   │       ├── dev_sc
+│   │   │   │       │   ├── all.uem
+│   │   │   │       │   ├── rttm
+│   │   │   │       │   └── wav.scp
+│   │   │   │       └── train_sc
+│   │   │   │           ├── all.uem
+│   │   │   │           ├── rttm
+│   │   │   │           └── wav.scp
+│   │   │   ├── dataset.py
+│   │   │   ├── infer_avg.py
+│   │   │   ├── README.md
+│   │   │   ├── run_dual_opt.py
+│   │   │   ├── run_single_opt.py
+│   │   │   ├── run_stage.sh
+│   │   │   ├── trainer_dual_opt.py
+│   │   │   └── trainer_single_opt.py
+│   │   └── diar_ssl_pruning
+│   │       ├── apply_pruning.py
+│   │       ├── conf
+│   │       │   ├── dual_opt_common_large.toml
+│   │       │   ├── dual_opt_common.toml
+│   │       │   ├── s80_base.toml
+│   │       │   └── s80_large.toml
+│   │       ├── convert_wavlm_from_hf.py
+│   │       ├── data -> ../diar_ssl/data/
+│   │       ├── dataset.py
+│   │       ├── infer_avg.py
+│   │       ├── README.md
+│   │       ├── run_distill_prune.py
+│   │       ├── run_dual_opt_continued_training.py
+│   │       ├── run_stage.sh
+│   │       ├── trainer_distill_prune.py
+│   │       └── trainer_dual_opt.py
+│   └── requirements.txt
+├── full_dump.txt
+├── interface
+│   ├── cli.py
+│   └── __init__.py
+├── langflow
+│   ├── rag.py
+│   ├── summary.py
+│   └── transcriber.py
+├── llms
+│   ├── __init__.py
+│   ├── llm.py
+│   └── tasks.py
+├── main.py
+├── prompts
+│   └── templates.py
+├── rag
+│   ├── build_summaries.py
+│   ├── build_transcripts.py
+│   ├── chunker.py
+│   ├── embedder.py
+│   ├── index.py
+│   ├── index_store.py
+│   ├── __init__.py
+│   ├── loader_summaries.py
+│   ├── loader_transcripts.py
+│   ├── search.py
+│   └── utils.py
+├── README.md
+├── requirements.txt
+├── Setting up the environment.txt
+├── sox
+├── summaries
+│   ├── meeting_2025-07-29_18-58-18_linux_summary.json
+│   ├── meeting_2025-07-29_19-04-46_linux_summary.json
+│   ├── meeting_2025-07-30_07-12-30_linux_summary.json
+│   ├── meeting_2025-07-30_07-47-52_linux_summary.json
+│   ├── meeting_2025-08-01_08-35-53_linux_summary.json
+│   ├── meeting_2025-08-01_08-41-18_linux_summary.json
+│   ├── meeting_2025-08-01_08-44-42_linux_summary.json
+│   ├── meeting_2025-08-01_09-07-39_linux_summary.json
+│   ├── meeting_2025-08-01_09-12-08_linux_summary.json
+│   ├── meeting_2025-08-01_19-09-58_linux_summary.json
+│   ├── meeting_2025-08-01_19-21-47_linux_summary.json
+│   ├── meeting_2025-08-01_19-45-08_linux_summary.json
+│   ├── meeting_2025-08-01_19-51-36_linux_summary.json
+│   ├── meeting_2025-08-07_12-06-05_linux_summary.json
+│   ├── meeting_2025-08-07_12-07-25_linux_summary.json
+│   ├── meeting_2025-08-08_07-24-06_linux_summary.json
+│   ├── meeting_2025-08-08_08-44-31_linux_summary.json
+│   └── meeting_2025-08-25_07-07-53_linux_summary.json
+├── transcriber
+│   ├── __init__.py
+│   ├── recorder.py
+│   ├── utils.py
+│   └── whisper.py
+├── transcripts
+│   ├── meetings
+│   │   ├── meeting_2025-08-08_08-44-31_linux_2025-08-08_08-45-14.txt
+│   │   └── meeting_2025-08-25_07-07-53_linux_2025-08-25_07-08-36.txt
+│   └── questions
+│       ├── question_2025-08-08_08-44-36_linux_2025-08-08_08-44-40.txt
+│       └── question_2025-08-25_07-07-58_linux_2025-08-25_07-08-05.txt
+└── utils
+    ├── config.py
+    └── __init__.py
+
+94 directories, 345 files

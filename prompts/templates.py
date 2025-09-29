@@ -77,4 +77,19 @@ def get_corporate_summary_prompt(transcript_text):
     """
     return prompt.format(transcript_text=transcript_text)
 
+def get_rag_answer_prompt(question_text: str, retrieved_texts: str) -> str:
+    """
+    question_text — вопрос пользователя
+    retrieved_texts — склеенный контекст из найденных чанков саммари
+    """
+    return (
+        "Ты корпоративный ассистент. Отвечай строго на русском.\n\n"
+        "Ниже — выдержки из саммари встреч. Используй их как первоисточник. "
+        "Если контекст не помогает, честно скажи, что по данным встреч ответ неочевиден, "
+        "и предложи, где можно уточнить.\n\n"
+        f"Вопрос:\n{question_text}\n\n"
+        f"Контекст:\n{retrieved_texts}\n\n"
+        "Дай краткий, точный и практичный ответ, с явными ссылками на конкретные пункты из контекста."
+    )
+
 

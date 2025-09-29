@@ -67,10 +67,23 @@ ensure_virtual_cable_and_loopback()
 
 
 AUDIO_DIR = "audio"
+AUDIO_DIR_MEET = os.path.join(AUDIO_DIR, "meetings")
+AUDIO_DIR_QUEST = os.path.join(AUDIO_DIR, "questions")
+os.makedirs(AUDIO_DIR_MEET, exist_ok=True)
+os.makedirs(AUDIO_DIR_QUEST, exist_ok=True)
 
 def _generate_filename(prefix):
+    """
+    prefix: 'meeting' | 'question'
+    """
     ts = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    return f"{AUDIO_DIR}/{prefix}_{ts}_{sys.platform}.wav"
+    if prefix == "meeting":
+        folder = AUDIO_DIR_MEET
+    elif prefix == "question":
+        folder = AUDIO_DIR_QUEST
+    else:
+        folder = AUDIO_DIR
+    return f"{folder}/{prefix}_{ts}_{sys.platform}.wav"
 
 class Recorder:
     def __init__(self,
@@ -81,8 +94,10 @@ class Recorder:
         self.samplerate = samplerate
         self.channels = channels
         self.main_proc = None
+        self.main_sox = None
         self.main_filename = None
         self.question_proc = None
+        self.question_sox = None
         self.question_filename = None
 
         os.makedirs(AUDIO_DIR, exist_ok=True)
@@ -103,7 +118,7 @@ class Recorder:
         ]
         parec_proc = subprocess.Popen(parec_cmd, stdout=subprocess.PIPE)
         sox_proc = subprocess.Popen(sox_cmd, stdin=parec_proc.stdout)
-        # Если задан duration_sec — останавливаем через timeout
+
         if duration_sec is not None:
             def stop_after_delay():
                 time.sleep(duration_sec)
@@ -113,6 +128,7 @@ class Recorder:
                 except Exception as e:
                     print("[Recorder] Ошибка при остановке процесса:", e)
             threading.Thread(target=stop_after_delay, daemon=True).start()
+
         return parec_proc, sox_proc
 
     def start_main_recording(self):
@@ -149,13 +165,8 @@ class Recorder:
 
     @classmethod
     def create_auto(cls, monitor_name=None, samplerate=48000, channels=1):
-        """
-        Фабричный метод для создания Recorder.
-        monitor_name — например, 'VirtualCable.monitor'.
-        """
+        # Готовим PulseAudio окружение (если используешь эту функцию)
         ensure_virtual_cable_and_loopback()
-
         if monitor_name is None:
             monitor_name = "VirtualCable.monitor"
         return cls(monitor_name=monitor_name, samplerate=samplerate, channels=channels)
-
